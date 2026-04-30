@@ -1,5 +1,5 @@
 DESCRIPTION: Add a trailing comma after the last array element "blue"
-OPTIMAL: 7
-SOLUTION_A: GkA,<Esc>ZZ  —  G to last line (]);  k to "blue" line;  A to append; type comma
-SOLUTION_B: /blue<CR>A,<Esc>ZZ  —  search then append (10 keys)
+OPTIMAL: 5
+SOLUTION_A: GkA,<Esc>  —  G to last line (]);  k to "blue" line;  A to append; type comma
+SOLUTION_B: /blue<CR>A,<Esc>  —  search then append (8 keys)
 NOTE: G goes to last line (];), k moves up one line to "blue". A appends to end of line without needing to navigate to the end.

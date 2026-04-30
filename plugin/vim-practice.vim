@@ -8,9 +8,81 @@ let s:root           = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
 let s:challenges_dir = s:root . '/challenges'
 let s:tmp            = s:root . '/.tmp'
 
+
+" Insert-exit aliases (optional): substring count adjusted on top of CSI-collapsed length.
+if !exists('g:vim_practice_insert_escape')
+  let g:vim_practice_insert_escape = []
+endif
+
+" Fold Esc + CSI / Esc O. into ONE key; never touches bare jj (those are ASCII j+j).
+if !exists('g:vim_practice_collapse_csi_escapes')
+  let g:vim_practice_collapse_csi_escapes = 1
+endif
+
 " ─── pure helpers — exposed via g:vp dict so tests can call them ─────────────
 
 let g:vp = {}
+
+function! s:macro_strlen_with_esc_sequences_collapsed(seq) abort
+  if empty(get(g:, 'vim_practice_collapse_csi_escapes', 1))
+    return strlen(a:seq)
+  endif
+  let t = a:seq
+  " CSI: ESC [ param* intermediate* final  (@ through ~ last byte).
+  let pat_csi = "\<Esc>\\[[0-9:;<=>+.]*[ -/]*[@-~]"
+  let prev = '__'
+  while t !=# prev
+    let prev = t
+    let t = substitute(t, pat_csi, "\<Esc>", 'g')
+  endwhile
+  " SS3: ESC O followed by one byte (common on some keypad/cursor setups).
+  let t = substitute(t, "\<Esc>O.", "\<Esc>", 'g')
+  return strlen(t)
+endfunction
+
+function! s:normalize_insert_escape_aliases(aliases) abort
+  let al = empty(a:aliases) ? [] : copy(a:aliases)
+  let t = type(al)
+  if t == type('')
+    let al = empty(al) ? [] : [al]
+  elseif t != type([])
+    let al = []
+  endif
+  return filter(copy(al), 'strlen(v:val) > 1')
+endfunction
+
+function! s:escape_alias_list() abort
+  return s:normalize_insert_escape_aliases(g:vim_practice_insert_escape)
+endfunction
+
+" Non-overlapping, greedy left→right counts of needle in haystack (byte-wise).
+function! s:macro_count_occurrences(haystack, needle) abort
+  let nl = strlen(a:needle)
+  let c = 0
+  let i = 0
+  while i + nl <= strlen(a:haystack)
+    if strpart(a:haystack, i, nl) ==# a:needle
+      let c += 1
+      let i += nl
+    else
+      let i += 1
+    endif
+  endwhile
+  return c
+endfunction
+
+function! g:vp.macro_key_count(raw, ...) abort
+  let keys = s:macro_strlen_with_esc_sequences_collapsed(a:raw)
+  let aliases = a:0 > 0 ? s:normalize_insert_escape_aliases(a:1)
+        \                       : s:escape_alias_list()
+  for needle in aliases
+    let oc = s:macro_count_occurrences(a:raw, needle)
+    if oc > 0
+      let keys -= oc * (strlen(needle) - 1)
+    endif
+  endfor
+  return keys
+endfunction
 
 function! g:vp.challenges() abort
   return sort(filter(glob(s:challenges_dir . '/*', 1, 1), 'isdirectory(v:val)'))
@@ -194,7 +266,10 @@ function! s:check() abort
     return
   endif
 
-  let keys    = strlen(getreg('q'))
+  let regq = getreg('q')
+  let keys_raw   = strlen(regq)
+  let keys_score = g:vp.macro_key_count(regq)
+  let keys    = keys_score
   let correct = g:vp.compare(getline(1, '$'), readfile(t:vp_target))
 
   echo ''
@@ -214,6 +289,10 @@ function! s:check() abort
 
   echo ''
   echo printf('  Your keys   : %d', keys)
+  if keys_raw != keys_score
+    echo printf('  (%d bytes recorded in q → %d Esc/keys for scoring)',
+          \ keys_raw, keys_score)
+  endif
   echo printf('  Optimal     : %d', t:vp_optimal)
 
   if keys == 0
@@ -227,7 +306,7 @@ function! s:check() abort
   endif
 
   echo ''
-  echo '  Keys typed  : ' . getreg('q')
+  echo '  Macro (q)   : ' . regq
   echo ''
 
   let ans = input('  Show solutions? [y/N] ')

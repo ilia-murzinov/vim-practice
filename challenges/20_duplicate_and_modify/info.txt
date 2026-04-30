@@ -1,4 +1,4 @@
 DESCRIPTION: Duplicate the line and rename the constant to VERBOSE
-OPTIMAL: 18
-SOLUTION_A: yypfDciwVERBOSE<Esc>ZZ  —  yank line, paste below, find D of DEBUG, change word
+OPTIMAL: 16
+SOLUTION_A: yypfDciwVERBOSE<Esc>  —  yank line, paste below, find D of DEBUG, change word
 NOTE: yyp is the canonical "duplicate line" pattern. After p, cursor is at start of the new line. fD finds the first uppercase D, which is the start of DEBUG. ciw changes the whole word regardless of cursor position within it.

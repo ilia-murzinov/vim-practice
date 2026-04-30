@@ -1,4 +1,4 @@
 DESCRIPTION: Wrap the expression "price + shipping" in Math.round(...)
-OPTIMAL: 23
-SOLUTION_A: f=wiMath.round(<Esc>f;i)<Esc>ZZ  —  find =, word-forward to price, insert before it; find ;, insert ) before it
+OPTIMAL: 21
+SOLUTION_A: f=wiMath.round(<Esc>f;i)<Esc>  —  find =, word-forward to price, insert before it; find ;, insert ) before it
 NOTE: Two insertions at precise positions. f=w positions cursor at start of the expression. The second f; finds the semicolon so you can insert the closing paren before it.

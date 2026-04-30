@@ -1,5 +1,5 @@
 DESCRIPTION: Delete the word "ugly" cleanly, no double spaces
-OPTIMAL: 7
-SOLUTION_A: 4wdawZZ  —  4 words forward, delete around word, save
-SOLUTION_B: /ugly<CR>dawZZ  —  search, delete around word, save (9 keys)
+OPTIMAL: 5
+SOLUTION_A: 4wdaw  —  4 words forward, delete around word
+SOLUTION_B: /ugly<CR>daw  —  search, delete around word (7 keys)
 NOTE: daw deletes the word + one adjacent space, keeping the line clean. diw leaves a double space.

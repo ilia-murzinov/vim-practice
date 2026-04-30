@@ -175,6 +175,46 @@ for s:j in range(len(s:entries))
 endfor
 call s:ok_true('each entry starts with its 1-based index', s:idx_ok)
 
+" g:vp.macro_key_count() ──────────────────────────────────────────────────────
+
+call s:ok('macro_key_count no alias leaves jj as two keys',
+      \ string(g:vp.macro_key_count('ciajj', [])), string(5))
+
+call s:ok('macro_key_count jj folds to one Esc-equivalent key',
+      \ string(g:vp.macro_key_count('ciajj', ['jj'])), string(4))
+
+call s:ok('macro_key_count greedy non-overlap jj in longer macro',
+      \ string(g:vp.macro_key_count('axxjjaxx', ['jj'])), string(7))
+
+call s:ok('macro_key_count two jj escapes back-to-back',
+      \ string(g:vp.macro_key_count('abcdjjjj', ['jj'])), string(6))
+
+call s:ok('macro_key_count jk two-byte alias',
+      \ string(g:vp.macro_key_count('xjky', ['jk'])), string(3))
+
+call s:ok('macro_key_count one-arg with default g: (no aliases): jj stays 2 keys',
+      \ string(g:vp.macro_key_count('abjj')), string(4))
+
+let g:vim_practice_insert_escape = ['jj']
+call s:ok('macro_key_count one-arg applies global aliases',
+      \ string(g:vp.macro_key_count('abjj')), string(3))
+let g:vim_practice_insert_escape = []
+
+call s:ok('macro_key_count ignores alias shorter than 2',
+      \ string(g:vp.macro_key_count('aab', ['a'])), string(3))
+
+" CSI / SS3: Esc begins 0x1b; jj is two j keys — unrelated.
+call s:ok('macro_key_count folds CSI after Esc',
+      \ string(g:vp.macro_key_count("\<Esc>[A", [])), string(1))
+
+let g:vim_practice_collapse_csi_escapes = 0
+call s:ok('CSI collapse off → Esc+[ length',
+      \ string(g:vp.macro_key_count("\<Esc>[A", [])), string(3))
+let g:vim_practice_collapse_csi_escapes = 1
+
+call s:ok('jj unchanged; CSI merged with prior Esc byte',
+      \ string(g:vp.macro_key_count('jj' . "\<Esc>[A", [])), string(3))
+
 " VimChallenge sets t: vars inside the new tab (regression: was set before tabnew) ──
 
 let s:tab_before = tabpagenr()

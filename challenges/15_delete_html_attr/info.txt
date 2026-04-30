@@ -1,4 +1,4 @@
 DESCRIPTION: Remove the class attribute (and its trailing space) from the button tag
-OPTIMAL: 7
-SOLUTION_A: fcdtdZZ  —  fc lands on 'c' of "class"; dtd deletes till (not including) 'd' of "disabled"
+OPTIMAL: 5
+SOLUTION_A: fcdtd  —  fc lands on 'c' of "class"; dtd deletes till (not including) 'd' of "disabled"
 NOTE: fc skips <button id="submit-btn" and lands on the 'c' of class. dt{char} is extremely precise: deletes exactly up to (but not including) the next occurrence of char. No visual selection needed.

@@ -56,15 +56,15 @@ def rename_all():
 
     target = start.replace(old, new)
 
-    cgn_keys = (1 + len(old) + 1) + (3 + len(new) + 1) + 5 + 2
-    sub_keys = 6 + len(old) + 3 + len(new) + 4 + 2
+    cgn_keys = (1 + len(old) + 1) + (3 + len(new) + 1) + 5
+    sub_keys = 6 + len(old) + 3 + len(new) + 4
     optimal  = min(cgn_keys, sub_keys)
 
     return (start, target,
             f'Rename "{old}" to "{new}" — 6 occurrences',
             optimal,
-            [f'/{old}<CR>cgn{new}<Esc>.....ZZ  —  cgn + dot-repeat for all 6',
-             f':%s/\\b{old}\\b/{new}/g<CR>ZZ  —  word-boundary substitution'],
+            [f'/{old}<CR>cgn{new}<Esc>.....  —  cgn + dot-repeat for all 6',
+             f':%s/\\b{old}\\b/{new}/g<CR>  —  word-boundary substitution'],
             'rename_all')
 
 
@@ -83,12 +83,12 @@ def for_to_map():
 
     target = f"const {out} = {coll}.map({item} => {fn}({item}));"
 
-    optimal = 4 + len(target) + 3  # ggcG + content + <Esc>ZZ
+    optimal = 4 + len(target) + 1  # ggcG + content + Esc
 
     return (start, target,
             'Convert the for-of/push loop to a .map() one-liner',
             optimal,
-            [f'ggcG{target}<Esc>ZZ  —  cG changes from line 1 to end of file'],
+            [f'ggcG{target}<Esc>  —  cG changes from line 1 to end of file'],
             'for_to_map')
 
 
@@ -117,10 +117,10 @@ def early_return():
 
     return (start, target,
             'Convert the if-block to an early return (invert condition, dedent, remove closing brace)',
-            41,
+            39,
             ['2Gf!c$=== null) return;<Esc>  —  rewrite condition line',
              'then  j<<j<<j<<  —  dedent the three body lines',
-             'then  /  }<CR>ddZZ  —  delete the if closing brace'],
+             'then  /  }<CR>dd  —  delete the if closing brace'],
             'early_return')
 
 
@@ -136,12 +136,12 @@ def destructure():
 
     target = f"const {{ {f1}, {f2}, {f3} }} = {obj};"
 
-    optimal = 4 + len(target) + 3  # ggcG + content + <Esc>ZZ
+    optimal = 4 + len(target) + 1  # ggcG + content + Esc
 
     return (start, target,
             f'Collapse the three `{obj}.*` assignments into one destructuring',
             optimal,
-            [f'ggcG{target}<Esc>ZZ  —  cG replaces all three lines at once'],
+            [f'ggcG{target}<Esc>  —  cG replaces all three lines at once'],
             'destructure')
 
 
@@ -157,12 +157,12 @@ def template_literal():
     rhs    = f"`{word1}, ${{{v1}}}! {mid.capitalize()} ${{{v2}}} {unit}.`"
     target = f"const {noun} = {rhs};"
 
-    optimal = 3 + len(rhs) + 3  # f=lc$ + rhs + <Esc>ZZ
+    optimal = 3 + len(rhs) + 1  # f=lc$ + rhs + Esc
 
     return (start, target,
             'Rewrite the string concatenation as a template literal',
             optimal,
-            [f'f=lc${rhs}<Esc>ZZ  —  f= finds =, l skips space, c$ rewrites the RHS'],
+            [f'f=lc${rhs}<Esc>  —  f= finds =, l skips space, c$ rewrites the RHS'],
             'template_literal')
 
 
@@ -183,13 +183,13 @@ def reorder_fields():
 
     start  = render(pairs)
     target = render(sorted(pairs))
-    optimal = len(':2,6sort\rZZ')
+    optimal = len(':2,6sort\r')
 
     return (start, target,
             f'Sort the {obj} fields alphabetically',
             optimal,
-            [':2,6sort<CR>ZZ  —  sort the field lines, leaving the braces in place',
-             'Vjjjj:sort<CR>ZZ  —  visually select the fields then sort'],
+            [':2,6sort<CR>  —  sort the field lines, leaving the braces in place',
+             'Vjjjj:sort<CR>  —  visually select the fields then sort'],
             'reorder_fields')
 
 
@@ -219,13 +219,13 @@ def extract_variable():
 
     expr_e  = expr.replace('+', r'\+').replace('"', r'\"')
     insert  = f'const {var} = {expr};'
-    optimal = (1 + len(insert) + 1) + (len(f':%s/{expr_e}/{var}/g\r')) + 2
+    optimal = (1 + len(insert) + 1) + (len(f':%s/{expr_e}/{var}/g\r'))
 
     return (start, target,
             f'Extract the repeated expression "{expr}" into a "{var}" variable',
             optimal,
             [f'2GOconst {var} = {expr};<Esc>  —  open a line above the first use',
-             f'then  :%s/{expr_e}/{var}/g<CR>ZZ  —  replace all 3 occurrences'],
+             f'then  :%s/{expr_e}/{var}/g<CR>  —  replace all 3 occurrences'],
             'extract_variable')
 
 
@@ -250,11 +250,11 @@ def swap_object_methods():
         }};""")
 
     # ddp on line 2 swaps lines 2 and 3
-    optimal = 5  # 2Gddp ZZ → actually just ddp on line 2 = 3 + ZZ = 5
+    optimal = 3  # 2Gddp
     return (start, target,
             f'Swap the two methods in the {obj} object',
             optimal,
-            ['2GddpZZ  —  go to line 2, cut it, paste below line 3'],
+            ['2Gddp  —  go to line 2, cut it, paste below line 3'],
             'swap_methods')
 
 
@@ -281,16 +281,15 @@ def add_default_param():
         ) {{}}""")
 
     # A on each param line, insert " = default"
-    # 2GA = {d1}<Esc>jA = {d2}<Esc>jA = {d3}<Esc>ZZ
     s1 = f' = {d1}'
     s2 = f' = {d2}'
     s3 = f' = {d3}'
-    optimal = 2 + (1 + len(s1) + 1) + 1 + (1 + len(s2) + 1) + 1 + (1 + len(s3) + 1) + 2
+    optimal = 2 + (1 + len(s1) + 1) + 1 + (1 + len(s2) + 1) + 1 + (1 + len(s3) + 1)
 
     return (start, target,
             'Add a default value to each of the three parameters',
             optimal,
-            [f'2GA = {d1}<Esc>jA = {d2}<Esc>jA = {d3}<Esc>ZZ  —  A appends at end of line; j moves down'],
+            [f'2GA = {d1}<Esc>jA = {d2}<Esc>jA = {d3}<Esc>  —  A appends at end of line; j moves down'],
             'add_default_param')
 
 

@@ -1,4 +1,4 @@
 DESCRIPTION: Collapse the 4-line object literal onto a single line
-OPTIMAL: 5
-SOLUTION_A: JJJZZ  —  J joins next line (strips leading whitespace, adds one space) x3 then save
+OPTIMAL: 3
+SOLUTION_A: JJJ  —  J joins next line (strips leading whitespace, adds one space) x3
 NOTE: J is underrated. It joins lines cleanly: removes the newline, strips leading whitespace from the joined line, inserts exactly one space. Three presses collapse 4 lines to 1.

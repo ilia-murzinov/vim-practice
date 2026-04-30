@@ -1,5 +1,5 @@
 DESCRIPTION: Delete all console.log lines using the global command
-OPTIMAL: 15
-SOLUTION_A: :g/console/d<CR>ZZ  —  :g runs d (delete) on every line matching /console/
+OPTIMAL: 13
+SOLUTION_A: :g/console/d<CR>  —  :g runs d (delete) on every line matching /console/
 SOLUTION_B: dd searching manually  —  much slower, error-prone at scale
 NOTE: :g/pattern/d is one of the most powerful vim commands. It scales to hundreds of lines instantly. The pattern can be any regex. :v/pattern/d deletes lines NOT matching.

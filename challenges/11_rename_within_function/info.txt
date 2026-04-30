@@ -1,5 +1,5 @@
 DESCRIPTION: Rename param "data" to "payload" — 3 occurrences inside the function
-OPTIMAL: 21
-SOLUTION_A: /data<CR>cgnpayload<Esc>..ZZ  —  search, change-next-match, dot-repeat twice
-SOLUTION_B: :%s/data/payload/g<CR>ZZ  —  substitution (22 keys, slightly slower)
+OPTIMAL: 19
+SOLUTION_A: /data<CR>cgnpayload<Esc>..  —  search, change-next-match, dot-repeat twice
+SOLUTION_B: :%s/data/payload/g<CR>  —  substitution (20 keys, slightly slower)
 NOTE: cgn changes the current search match in-place. Each . repeats cgn+insert for the next occurrence. This is faster than n. for anything beyond 2 replacements.

@@ -1,5 +1,5 @@
 DESCRIPTION: Sort the four React import lines alphabetically by hook name
-OPTIMAL: 8
-SOLUTION_A: :sort<CR>ZZ  —  :sort sorts all lines in the file alphabetically
-SOLUTION_B: Vip:sort<CR>ZZ  —  select paragraph then sort (useful when file has other content)
+OPTIMAL: 6
+SOLUTION_A: :sort<CR>  —  :sort sorts all lines in the file alphabetically
+SOLUTION_B: Vip:sort<CR>  —  select paragraph then sort (useful when file has other content)
 NOTE: :sort with no arguments sorts lexicographically. All lines share "import { use" prefix so sorting proceeds by hook name: Callback < Effect < Memo < State.
