@@ -147,6 +147,34 @@ endfor
 call s:ok('all challenges have OPTIMAL > 0',
       \ s:bad_optimal, [])
 
+" s:inputlist_pick entry format — numbers parse correctly ────────────────────
+
+let s:all = g:vp.challenges()
+let s:entries = []
+let s:i = 1
+for s:dir in s:all
+  call add(s:entries, printf('%2d  %-50s %s keys', s:i,
+        \ g:vp.meta(s:dir, 'DESCRIPTION'), g:vp.meta(s:dir, 'OPTIMAL')))
+  let s:i += 1
+endfor
+
+call s:ok_true('pick entries count matches challenges',
+      \ len(s:entries) == len(s:all))
+
+call s:ok_true('first entry parses to challenge 1',
+      \ str2nr(matchstr(s:entries[0], '^\s*\zs\d\+')) == 1)
+
+call s:ok_true('last entry parses to correct challenge number',
+      \ str2nr(matchstr(s:entries[-1], '^\s*\zs\d\+')) == len(s:all))
+
+let s:idx_ok = 1
+for s:j in range(len(s:entries))
+  if str2nr(matchstr(s:entries[s:j], '^\s*\zs\d\+')) != s:j + 1
+    let s:idx_ok = 0
+  endif
+endfor
+call s:ok_true('each entry starts with its 1-based index', s:idx_ok)
+
 " VimChallenge sets t: vars inside the new tab (regression: was set before tabnew) ──
 
 let s:tab_before = tabpagenr()
@@ -161,6 +189,38 @@ call s:ok_true('t:vp_target exists in new tab after VimChallenge',
       \ exists('t:vp_target'))
 call s:ok_true('t:vp_optimal exists in new tab after VimChallenge',
       \ exists('t:vp_optimal'))
+tabclose
+
+" Buffer picker — buffer properties ──────────────────────────────────────────
+" fzf#run is not available under -u NONE, so VimPick always uses the buffer picker
+
+VimPick
+
+call s:ok('picker: buftype is nofile',
+      \ &buftype, 'nofile')
+call s:ok_true('picker: nomodifiable',
+      \ !&modifiable)
+call s:ok_true('picker: cursorline enabled',
+      \ &cursorline)
+call s:ok_true('picker: line count equals challenge count',
+      \ line('$') ==# len(g:vp.challenges()))
+call s:ok_true('picker: line 1 represents challenge 1',
+      \ str2nr(matchstr(getline(1), '^\s*\zs\d\+')) ==# 1)
+call s:ok_true('picker: last line represents last challenge',
+      \ str2nr(matchstr(getline('$'), '^\s*\zs\d\+')) ==# len(g:vp.challenges()))
+
+" Buffer picker — selection loads the correct challenge ───────────────────────
+
+normal! 5G
+let s:pick_tab_before = tabpagenr()
+call feedkeys("\<CR>", 'xt')
+
+call s:ok_true('picker: opens a new tab on selection',
+      \ tabpagenr() !=# s:pick_tab_before)
+call s:ok_true('picker: t:vp_name set after selection',
+      \ exists('t:vp_name'))
+call s:ok_true('picker: correct challenge loaded (challenge 5)',
+      \ t:vp_name =~# '^05_')
 tabclose
 
 " ─────────────────────────────────────────────────────────────────────────────

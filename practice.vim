@@ -63,6 +63,71 @@ function! s:list() abort
   echo ''
 endfunction
 
+" ─── :VimPick ─────────────────────────────────────────────────────────────────
+
+function! s:pick() abort
+  let all = g:vp.challenges()
+  if empty(all)
+    call s:hl('  No challenges found in ' . s:challenges_dir, 'WarningMsg')
+    return
+  endif
+
+  let entries = []
+  let i = 1
+  for dir in all
+    let desc = g:vp.meta(dir, 'DESCRIPTION')
+    let opt  = g:vp.meta(dir, 'OPTIMAL')
+    call add(entries, printf('%2d  %-50s %s keys', i, desc, opt))
+    let i += 1
+  endfor
+
+  if exists('*fzf#run')
+    call fzf#run(fzf#wrap('vim-practice', {
+          \ 'source':  entries,
+          \ 'sink':    function('s:fzf_sink'),
+          \ 'options': ['--prompt', 'Challenge> ', '--no-multi',
+          \             '--preview-window', 'hidden'],
+          \ }))
+  else
+    call s:inputlist_pick(entries)
+  endif
+endfunction
+
+function! s:fzf_sink(line) abort
+  let n = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
+  if n > 0
+    call s:load(n)
+  endif
+endfunction
+
+function! s:inputlist_pick(entries) abort
+  let height = min([len(a:entries), 15])
+  execute 'botright ' . height . 'split'
+  enew
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+  setlocal nonumber norelativenumber nocursorcolumn cursorline
+  setlocal statusline=\ Vim\ Practice\ \ \ <CR>\ load\ \ j/k\ navigate\ \ q\ close
+
+  call setline(1, a:entries)
+  setlocal nomodifiable readonly
+  normal! gg
+
+  let b:vp_entry_count = len(a:entries)
+
+  nnoremap <buffer> <silent> <CR>  :call <SID>picker_select()<CR>
+  nnoremap <buffer> <silent> q     :bwipe!<CR>
+  nnoremap <buffer> <silent> <Esc> :bwipe!<CR>
+endfunction
+
+function! s:picker_select() abort
+  let n     = line('.')
+  let count = b:vp_entry_count
+  bwipe!
+  if n >= 1 && n <= count
+    call s:load(n)
+  endif
+endfunction
+
 " ─── :VimChallenge {n} ───────────────────────────────────────────────────────
 
 function! s:load(n) abort
@@ -206,6 +271,7 @@ endfunction
 " ─── keymaps ─────────────────────────────────────────────────────────────────
 
 nnoremap <Space>v  :VimChallenge<Space>
+nnoremap <Space>vp :VimPick<CR>
 nnoremap <Space>vc :VimCheck<CR>
 nnoremap <Space>vl :VimList<CR>
 nnoremap <Space>vr :VimReset<CR>
@@ -213,11 +279,12 @@ nnoremap <Space>vr :VimReset<CR>
 " ─── commands ────────────────────────────────────────────────────────────────
 
 command!          VimList      call s:list()
+command!          VimPick      call s:pick()
 command! -nargs=1 VimChallenge call s:load(<args>)
 command!          VimCheck     call s:check()
 command!          VimReset     call s:reset()
 
 " Show list on load
 call s:list()
-call s:hl('  :VimChallenge {n}   :VimList   :VimCheck   :VimReset', 'Comment')
+call s:hl('  :VimPick   :VimChallenge {n}   :VimList   :VimCheck   :VimReset', 'Comment')
 echo ''

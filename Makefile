@@ -1,7 +1,9 @@
 .PHONY: practice test clean
 
+VIM := $(if $(shell command -v nvim 2>/dev/null),nvim,vim)
+
 practice:
-	vim -S "$(dir $(abspath $(lastword $(MAKEFILE_LIST))))practice.vim"
+	$(VIM) -S "$(dir $(abspath $(lastword $(MAKEFILE_LIST))))practice.vim"
 
 test:
 	nvim --headless -u NONE -S "$(dir $(abspath $(lastword $(MAKEFILE_LIST))))test.vim"
