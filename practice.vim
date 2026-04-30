@@ -89,12 +89,6 @@ function! s:load(n) abort
     call s:hl('  Missing target.txt in ' . dir, 'ErrorMsg') | return
   endif
 
-  " Per-tab state: multiple challenges can be open in different tabs simultaneously
-  let t:vp_dir     = dir
-  let t:vp_target  = target
-  let t:vp_optimal = str2nr(g:vp.meta(dir, 'OPTIMAL'))
-  let t:vp_name    = fnamemodify(dir, ':t')
-
   " Each challenge gets its own working file so tabs don't clobber each other
   call mkdir(s:tmp, 'p')
   let work = g:vp.work_path(dir)
@@ -105,6 +99,12 @@ function! s:load(n) abort
 
   " Layout: working buffer (top) / target read-only (bottom)
   execute 'tabnew ' . fnameescape(work)
+
+  " Per-tab state lives in the new tab so :VimCheck/:VimReset can access it
+  let t:vp_dir     = dir
+  let t:vp_target  = target
+  let t:vp_optimal = str2nr(g:vp.meta(dir, 'OPTIMAL'))
+  let t:vp_name    = fnamemodify(dir, ':t')
   setlocal noswapfile
   execute 'rightbelow split ' . fnameescape(target)
   setlocal readonly nomodifiable noswapfile bufhidden=hide

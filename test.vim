@@ -147,6 +147,22 @@ endfor
 call s:ok('all challenges have OPTIMAL > 0',
       \ s:bad_optimal, [])
 
+" VimChallenge sets t: vars inside the new tab (regression: was set before tabnew) ──
+
+let s:tab_before = tabpagenr()
+VimChallenge 1
+call s:ok_true('VimChallenge opens a new tab',
+      \ tabpagenr() != s:tab_before)
+call s:ok_true('t:vp_name exists in new tab after VimChallenge',
+      \ exists('t:vp_name'))
+call s:ok_true('t:vp_dir exists in new tab after VimChallenge',
+      \ exists('t:vp_dir'))
+call s:ok_true('t:vp_target exists in new tab after VimChallenge',
+      \ exists('t:vp_target'))
+call s:ok_true('t:vp_optimal exists in new tab after VimChallenge',
+      \ exists('t:vp_optimal'))
+tabclose
+
 " ─────────────────────────────────────────────────────────────────────────────
 
 call s:done()
