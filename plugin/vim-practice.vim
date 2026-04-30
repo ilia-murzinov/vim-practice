@@ -1,11 +1,10 @@
-" vim-practice/practice.vim
-" Open with:  vim -S practice.vim
-"       or:   :source path/to/practice.vim
+" vim-practice — plugin/vim-practice.vim
+" Install: Plug 'ilia-murzinov/vim-practice'
 
 if exists('g:vim_practice_loaded') | finish | endif
 let g:vim_practice_loaded = 1
 
-let s:root           = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let s:root           = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
 let s:challenges_dir = s:root . '/challenges'
 let s:tmp            = s:root . '/.tmp'
 

@@ -2,7 +2,7 @@
 " Run with:  nvim --headless -u NONE -S test.vim; echo "exit: $?"
 " Exit code 0 = all tests pass, 1 = failures
 
-source practice.vim
+source plugin/vim-practice.vim
 
 " ─── tiny test framework ─────────────────────────────────────────────────────
 

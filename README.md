@@ -1,6 +1,25 @@
-# Vim Motion Practice
+# vim-practice
 
 Five focused exercise files and 20 timed challenges. Each exercise file has folded solutions — try before peeking.
+
+## Installation
+
+**vim-plug:**
+```vim
+Plug 'ilia-murzinov/vim-practice'
+```
+
+**Optional — fzf integration** (challenge picker uses fzf when available):
+```vim
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'ilia-murzinov/vim-practice'
+```
+
+**Without a plugin manager** — clone the repo and source the plugin manually:
+```vim
+source /path/to/vim-practice/plugin/vim-practice.vim
+```
 
 ## Exercise Files
 
