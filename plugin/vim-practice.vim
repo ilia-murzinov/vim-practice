@@ -46,29 +46,7 @@ endfunction
 function! s:list() abort
   let all = g:vp.challenges()
   if empty(all)
-    call s:hl('  No challenges found in ' . s:challenges_dir, 'WarningMsg')
-    return
-  endif
-  echo ''
-  call s:hl('  Vim Practice — Challenges', 'Title')
-  echo '  ' . repeat('─', 58)
-  let i = 1
-  for dir in all
-    let desc = g:vp.meta(dir, 'DESCRIPTION')
-    let opt  = g:vp.meta(dir, 'OPTIMAL')
-    echo printf('  %2d.  %-46s %s keys', i, desc, opt)
-    let i += 1
-  endfor
-  echo ''
-endfunction
-
-" ─── :VimPick ─────────────────────────────────────────────────────────────────
-
-function! s:pick() abort
-  let all = g:vp.challenges()
-  if empty(all)
-    call s:hl('  No challenges found in ' . s:challenges_dir, 'WarningMsg')
-    return
+    call s:hl('  No challenges found in ' . s:challenges_dir, 'WarningMsg') | return
   endif
 
   let entries = []
@@ -270,20 +248,14 @@ endfunction
 " ─── keymaps ─────────────────────────────────────────────────────────────────
 
 nnoremap <Space>v  :VimChallenge<Space>
-nnoremap <Space>vp :VimPick<CR>
-nnoremap <Space>vc :VimCheck<CR>
 nnoremap <Space>vl :VimList<CR>
+nnoremap <Space>vc :VimCheck<CR>
 nnoremap <Space>vr :VimReset<CR>
 
 " ─── commands ────────────────────────────────────────────────────────────────
 
 command!          VimList      call s:list()
-command!          VimPick      call s:pick()
 command! -nargs=1 VimChallenge call s:load(<args>)
 command!          VimCheck     call s:check()
 command!          VimReset     call s:reset()
 
-" Show list on load
-call s:list()
-call s:hl('  :VimPick   :VimChallenge {n}   :VimList   :VimCheck   :VimReset', 'Comment')
-echo ''

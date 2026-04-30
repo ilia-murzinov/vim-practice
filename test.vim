@@ -192,9 +192,9 @@ call s:ok_true('t:vp_optimal exists in new tab after VimChallenge',
 tabclose
 
 " Buffer picker — buffer properties ──────────────────────────────────────────
-" fzf#run is not available under -u NONE, so VimPick always uses the buffer picker
+" fzf#run is not available under -u NONE, so VimList always uses the buffer picker
 
-VimPick
+VimList
 
 call s:ok('picker: buftype is nofile',
       \ &buftype, 'nofile')

@@ -21,6 +21,7 @@ Plug 'ilia-murzinov/vim-practice'
 source /path/to/vim-practice/plugin/vim-practice.vim
 ```
 
+
 ## Exercise Files
 
 | File | Topic |
