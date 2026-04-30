@@ -1,0 +1,4 @@
+step 1: init
+step 2: config
+step 3: build
+step 4: deploy

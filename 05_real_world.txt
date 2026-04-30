@@ -1,0 +1,290 @@
+VIM PRACTICE — Real-World Editing Scenarios
+════════════════════════════════════════════════════════════════
+Mixed motions. No hints about which motion to use — figure it out.
+These are tasks you'd hit daily editing code.
+════════════════════════════════════════════════════════════════
+
+
+SCENARIO 1 — Rename a function everywhere
+───────────────────────────────────────────
+You need to rename "getUserData" to "fetchUser" in the snippet below.
+Cursor starts at [*].
+
+  function [*]getUserData(id) {
+    const data = getUserData.cache[id];
+    if (!data) return getUserData.fallback(id);
+    return data;
+  }
+
+▶ SOLUTION {{{
+  :%s/getUserData/fetchUser/g<CR>
+
+  That's a substitution, not a motion — but it's the RIGHT tool here.
+  Don't use motions when a substitution is more appropriate.
+
+  If you want motion-only for the first occurrence (cursor on it):
+  ciw fetchUser<Esc>   — change word, type new name
+  Then: n.n.           — if you searched first with /getUserData<CR>
+  or:   cgn fetchUser<Esc>  — change next search match (cgn is powerful)
+
+  Best real workflow:
+  /getUserData<CR>     — search
+  cgn fetchUser<Esc>   — change match
+  .                    — repeat for each occurrence (. repeats cgn + the text)
+  n.n.n.               — or n then . for controlled replacement
+
+  cgn + . is the modern vim way to do targeted multi-replace.
+}}}
+
+
+SCENARIO 2 — Extract a value to a variable
+────────────────────────────────────────────
+Cursor at [*]. Extract the hardcoded timeout to a named constant above the call.
+
+  function init() {
+    setTimeout([*]callback, 3000);
+  }
+
+Target:
+  function init() {
+    const TIMEOUT_MS = 3000;
+    setTimeout(callback, TIMEOUT_MS);
+  }
+
+▶ SOLUTION {{{
+  Step 1: Yank the value
+  f3          — find '3' (start of 3000)
+  yw          — yank the word "3000"
+
+  Step 2: Open new line above setTimeout
+  O           — open line above, enter insert mode
+  const TIMEOUT_MS = <C-r>";<Esc>   — paste yanked value (3000)
+
+  Step 3: Replace the literal
+  j           — back to setTimeout line
+  f3          — find the 3000
+  ciw         — change the word
+  TIMEOUT_MS<Esc>
+
+  Full sequence:
+  f3 yw O const TIMEOUT_MS = <C-r>";<Esc> j f3 ciwTIMEOUT_MS<Esc>
+
+  Key techniques used:
+  - yw to grab value
+  - O to open line above
+  - <C-r>" to paste in insert mode
+  - ciw to replace in-place
+}}}
+
+
+SCENARIO 3 — Swap two function arguments
+──────────────────────────────────────────
+Cursor at [*]. Swap the arguments so "b" comes first.
+
+  doSomething([*]a, b)
+
+Target: doSomething(b, a)
+
+▶ SOLUTION {{{
+  Method A — delete and paste:
+  f(          — jump to opening paren
+  l           — move inside (now on 'a')
+  dt,         — delete "a" → yields ", b)"
+  f)          — jump to closing paren
+  P           — paste "a" before )
+  Now: ", ba)" — hmm, not quite right.
+
+  Let me redo:
+  After dt, we have: doSomething(, b)
+  Then: 2l or f  to move past ", " then P:
+  doSomething(, ba)  — still off
+
+  Better method — use marks:
+  f(l         — inside parens, on 'a'
+  ma          — mark position a
+  dt,         — delete first arg "a" → register: "a"
+  2l          — skip past ", " to 'b'
+  "byt)       — yank second arg into register b  (yank till ')')
+  di(         — delete inside parens entirely
+  f(a         — append inside paren opening
+  <C-r>b, <C-r>"<Esc>  — paste b then a
+
+  Actually clearest for simple swaps:
+  Use visual + sort, or just rewrite: ci(b, a<Esc>
+
+  Honest answer: for simple 2-arg swaps, ci( and retype is often fastest.
+  ci(b, a<Esc>  — 11 keystrokes, done.
+}}}
+
+
+SCENARIO 4 — Comment out a block
+──────────────────────────────────
+Cursor at [*]. Comment out the error handling block (add // to each line).
+
+  function process(data) {
+    const result = transform(data);
+  [*]  if (!result) {
+      log("error");
+      return null;
+    }
+    return result;
+  }
+
+▶ SOLUTION {{{
+  Method A — visual block:
+  <C-v>       — enter visual block mode
+  3j          — select 3 lines down (4 lines total)
+  I// <Esc>   — insert "// " at start of each selected line
+
+  This is the canonical vim approach for block commenting.
+  The I in visual block mode inserts at the start of each line in the block.
+
+  Method B — norm command:
+  :.,+3norm I// <CR>   — insert "// " at start of current + 3 next lines
+
+  Method C — macro:
+  qa I// <Esc>j q  — record: insert comment, go down
+  3@a              — run 3 more times
+
+  Winner for speed: <C-v>3jI// <Esc>
+  This is why visual block mode exists.
+
+  To uncomment: <C-v>3j2ld  (select 2 chars, delete)
+}}}
+
+
+SCENARIO 5 — Reformat a long function call
+────────────────────────────────────────────
+Cursor at [*]. Split this single-line call into multiple lines (one arg per line).
+
+  const result = [*]doWork(firstArg, secondArg, thirdArg, fourthArg);
+
+Target:
+  const result = doWork(
+    firstArg,
+    secondArg,
+    thirdArg,
+    fourthArg,
+  );
+
+▶ SOLUTION {{{
+  f(a<CR>       — find (, append newline
+  Now cursor is on next line inside paren.
+
+  Then for each comma:
+  f,a<CR>       — find comma, append newline after it
+  .             — repeat for remaining commas
+
+  For the closing paren:
+  f)i<CR>       — find ), insert newline before it
+
+  Full sequence:
+  f(a<CR><Esc>  f,a<CR><Esc>  .  .  f)i<CR><Esc>
+
+  Then indent the args:  select the arg lines and use > or ==
+
+  Fastest if you have a formatter: gq or format command on the block.
+  In practice: use your language server's format-on-save for this.
+
+  Vim motion lesson here: f + append/insert is the pattern for "insert at delimiter".
+}}}
+
+
+SCENARIO 6 — Delete trailing whitespace
+─────────────────────────────────────────
+Remove all trailing spaces from this snippet (cursor anywhere).
+
+  const a = 1;
+  const b = 2;
+  function foo() {
+    return a + b;
+  }
+
+▶ SOLUTION {{{
+  :%s/\s\+$//g<CR>
+
+  This is a substitution, not a motion — and it's the right tool.
+
+  Motion alternative (educational):
+  For a single line, cursor at end of line:
+  g_         — jump to last non-blank char on line
+  d$         — delete to end of line
+
+  But for a whole file: the substitution is always correct.
+
+  Add to your vimrc to do this on save:
+  autocmd BufWritePre * :%s/\s\+$//e
+}}}
+
+
+SCENARIO 7 — Navigate and edit across methods
+───────────────────────────────────────────────
+Cursor at [*]. You need to:
+1. Copy the return type from method A
+2. Paste it as the return type of method B
+
+  public [*]ResponseEntity<UserDto> getUser(Long id) {
+    return service.getUser(id);
+  }
+
+  public ??? updateUser(Long id, UserDto dto) {
+    return service.update(id, dto);
+  }
+
+▶ SOLUTION {{{
+  Step 1: Select and yank the return type.
+  Cursor is on 'R' of "ResponseEntity".
+  yt(      — yank till '(' → yanks "ResponseEntity<UserDto> getUser"... too much
+
+  Actually: the type includes generics with <>, so:
+  yW       — yank the WORD "ResponseEntity<UserDto>" ✓
+             (W treats the whole token as one WORD since no whitespace inside)
+
+  Wait: "ResponseEntity<UserDto>" does contain < and > which are not whitespace,
+  so yW captures it all. ✓
+
+  Step 2: Navigate to "???"
+  /???<CR>
+
+  Step 3: Replace
+  cw        — change word "???"
+  <C-r>"    — paste yanked text in insert mode
+  <Esc>
+
+  Full: yW /???<CR> cw<C-r>"<Esc>
+  That's about 15 keystrokes for the whole operation.
+
+  Key patterns:
+  yW        — grab space-delimited token (great for types with generics)
+  <C-r>"    — paste in insert mode without leaving insert mode
+}}}
+
+
+════════════════════════════════════════════════════════════════
+BONUS: Speed Reference
+════════════════════════════════════════════════════════════════
+
+FASTEST WAYS TO...
+
+  Delete a word:           daw  (with space) / diw (without)
+  Change a word:           ciw
+  Delete to char:          dt{c} or df{c}
+  Change to end of line:   C
+  Delete to end of line:   D
+  Yank a line:             yy
+  Duplicate a line:        yyp
+  Delete a line:           dd
+  Join lines:              J
+  Swap chars:              xp
+  Undo:                    u
+  Redo:                    <C-r>
+  Repeat last change:      .
+  Go to matching bracket:  %
+  Jump to line N:          Ngg or NG
+  Center screen:           zz
+  Go to definition:        gd (or LSP: gD)
+  Format line:             ==
+  Format block:            =i{
+
+════════════════════════════════════════════════════════════════
+vim: foldmethod=marker foldlevel=0

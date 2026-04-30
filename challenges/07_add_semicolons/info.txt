@@ -1,0 +1,5 @@
+DESCRIPTION: Add a semicolon to the end of all 4 lines
+OPTIMAL: 11
+SOLUTION_A: A;<Esc>j.j.j.ZZ  —  append to first line, dot-repeat on each line (A + ; + Esc + j. + j. + j. + ZZ = 11 keys)
+SOLUTION_B: <C-v>3j$A;<Esc>ZZ  —  visual block to end of each line, append (works but A in visual block behaves differently per vim version)
+NOTE: The . command repeats the entire last change (A;<Esc>). Combine with j to move down and repeat. This scales: 20 lines = A;<Esc> then 19x j.

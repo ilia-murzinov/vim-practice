@@ -1,0 +1,4 @@
+function process(data) {
+  const result = transform(data);
+  return result;
+}

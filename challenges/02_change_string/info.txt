@@ -1,0 +1,5 @@
+DESCRIPTION: Change the string value from "hello world" to "goodbye"
+OPTIMAL: 13
+SOLUTION_A: ci"goodbye<Esc>ZZ  —  change inside quotes, type new value (c i " = 3 keys + 7 chars + Esc + ZZ)
+SOLUTION_B: f"ci"goodbye<Esc>ZZ  —  find quote first, then ci" (2 extra keys, unnecessary)
+NOTE: ci" works from anywhere on the line — it searches forward for the nearest ". No need to navigate to the quote first.

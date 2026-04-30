@@ -1,0 +1,5 @@
+DESCRIPTION: Clear the string value, leaving empty quotes — "active" becomes ""
+OPTIMAL: 6
+SOLUTION_A: ci"<Esc>ZZ  —  change inside quotes to nothing, immediately exit insert (c i " + Esc + ZZ = 6 keys)
+SOLUTION_B: di"ZZ  —  delete inside quotes (5 keys — but di" vs ci"<Esc> same result here)
+NOTE: ci" + immediate Esc leaves empty quotes. di" also works and is 1 key fewer (no Esc needed after delete). Try both.

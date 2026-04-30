@@ -1,0 +1,5 @@
+DESCRIPTION: Swap the two arguments — alpha and beta swap positions
+OPTIMAL: 16
+SOLUTION_A: ci(beta, alpha<Esc>ZZ  —  change inside parens, retype in reversed order (c i ( + "beta, alpha" + Esc + ZZ = 16 keys)
+SOLUTION_B: dawwP fix-spaces ZZ  —  delete first arg, paste after second (complex, more keys)
+NOTE: For simple 2-arg swaps, ci( and retype is almost always the fastest. Motion-based swaps add complexity that exceeds the typing cost.

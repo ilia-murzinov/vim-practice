@@ -1,0 +1,115 @@
+{
+  "users": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Johnson",
+      "status": "ACTIVE",
+      "createdAt": "2024-01-15T08:30:00Z",
+      "updatedAt": "2024-03-20T14:22:00Z",
+      "address": {
+        "street": "123 Maple Street",
+        "city": "Portland",
+        "state": "OR",
+        "postalCode": "97201",
+        "country": "US"
+      },
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/Los_Angeles",
+        "notificationsEnabled": true,
+        "marketingOptIn": false,
+        "theme": "dark"
+      }
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-bcde-f01234567891",
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Smith",
+      "status": "ACTIVE",
+      "createdAt": "2024-02-01T10:00:00Z",
+      "updatedAt": "2024-02-01T10:00:00Z",
+      "address": {
+        "street": "456 Oak Avenue",
+        "city": "Austin",
+        "state": "TX",
+        "postalCode": "78701",
+        "country": "US"
+      },
+      "preferences": {
+        "locale": "en-US",
+        "timezone": "America/Chicago",
+        "notificationsEnabled": true,
+        "marketingOptIn": true,
+        "theme": "light"
+      }
+    },
+    {
+      "id": "c3d4e5f6-a7b8-9012-cdef-012345678912",
+      "email": "carol@example.com",
+      "firstName": "Carol",
+      "lastName": "Williams",
+      "status": "SUSPENDED",
+      "createdAt": "2023-11-10T16:45:00Z",
+      "updatedAt": "2024-04-01T09:00:00Z",
+      "address": null,
+      "preferences": {
+        "locale": "en-GB",
+        "timezone": "Europe/London",
+        "notificationsEnabled": false,
+        "marketingOptIn": false,
+        "theme": "system"
+      }
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-001",
+      "name": "Wireless Keyboard",
+      "description": "Compact mechanical keyboard with backlight",
+      "priceInCents": 8999,
+      "currency": "USD",
+      "category": "electronics",
+      "tags": ["keyboard", "wireless", "mechanical", "backlit"],
+      "inStock": true,
+      "stockQuantity": 142
+    },
+    {
+      "id": "prod-002",
+      "name": "USB-C Hub",
+      "description": "7-in-1 USB-C hub with HDMI, USB-A, SD card, and PD charging",
+      "priceInCents": 4499,
+      "currency": "USD",
+      "category": "electronics",
+      "tags": ["usb-c", "hub", "hdmi", "multiport"],
+      "inStock": true,
+      "stockQuantity": 89
+    },
+    {
+      "id": "prod-003",
+      "name": "Desk Mat XL",
+      "description": "Large non-slip desk mat, 900x400mm",
+      "priceInCents": 2999,
+      "currency": "USD",
+      "category": "accessories",
+      "tags": ["desk", "mat", "xl", "non-slip"],
+      "inStock": false,
+      "stockQuantity": 0
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2024-04-30T12:00:00Z",
+    "totalUsers": 3,
+    "totalProducts": 3,
+    "pagination": {
+      "page": 1,
+      "pageSize": 20,
+      "total": 3,
+      "hasNextPage": false,
+      "hasPreviousPage": false
+    }
+  }
+}

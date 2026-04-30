@@ -1,0 +1,4 @@
+DESCRIPTION: Swap the true and false branches of the ternary expression
+OPTIMAL: 22
+SOLUTION_A: f"ci"fail<Esc>;;ci"pass<Esc>ZZ  —  change first string; ;; repeats f" twice to skip closing quote and land on opening quote of second string
+NOTE: After ci"fail<Esc>, cursor is on 'l' of "fail". First ; finds closing " of that "fail". Second ; finds the opening " of the second string ": "fail". Then ci" changes it.

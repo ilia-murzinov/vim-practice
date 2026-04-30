@@ -1,0 +1,115 @@
+VIM PRACTICE — Word Motions
+════════════════════════════════════════════════════════════════
+Motions: w  b  e  W  B  E  ge  gE
+
+  w   — forward to start of next word
+  b   — backward to start of current/previous word
+  e   — forward to end of current/next word
+  ge  — backward to end of previous word
+  W/B/E — same but WORD (whitespace-delimited, ignores punctuation)
+
+Solutions are folded. Use  za  to toggle, zM to close all, zR to open all.
+════════════════════════════════════════════════════════════════
+
+
+EXERCISE 1 — Count your jumps
+──────────────────────────────
+Cursor starts at [*]. How many  w  presses to reach "seven"?
+
+  [*]one two three four five six seven eight nine ten
+
+Before peeking: guess the number, then verify.
+
+▶ SOLUTION {{{
+  6w — "one" is word 0 (cursor on it), six w presses land on "seven"
+  Also valid: 6W (same result; no punctuation here)
+  Faster: /seven<CR> — but that's a search, not a word motion
+}}}
+
+
+EXERCISE 2 — Backward navigation
+──────────────────────────────────
+Cursor starts at [*]. Reach "start" in the fewest keystrokes.
+
+  start middle-of middle end [*]here
+
+▶ SOLUTION {{{
+  3b  — lands on "start"  (b treats hyphen as word boundary)
+  2B  — lands on "start"  (B treats whole "middle-of" as one WORD — only 2 jumps)
+  Winner: 2B (fewer keystrokes when words have punctuation/hyphens)
+}}}
+
+
+EXERCISE 3 — End-of-word motion
+─────────────────────────────────
+Cursor starts at [*] (on the 'f' of "fix"). Delete to end of word without
+entering insert mode and without deleting the space after the word.
+
+  Please [*]fix this sentence carefully.
+
+▶ SOLUTION {{{
+  de  — deletes to end of current word ("fix"), leaves the space
+  vs dw — deletes "fix " (word + trailing space) — leaves no space, slightly wrong
+  de is the right tool here
+}}}
+
+
+EXERCISE 4 — Mixed word sizes
+───────────────────────────────
+Cursor starts at [*] (on "var"). Reach "complicated" using the fewest total keystrokes.
+The line has mixed word/WORD boundaries.
+
+  [*]var myObject.field = someVeryLong_and.complicated + 1;
+
+▶ SOLUTION {{{
+  Using w: 7w  (var → myObject → . → field → = → someVeryLong_and → . → complicated)
+           wait — let's count: myObject(1) .(2) field(3) =(4) someVeryLong_and(5) .(6) complicated(7) = 7w ✓
+  Using W: 4W  (var → myObject.field → = → someVeryLong_and.complicated) = 4W ✓
+  Winner: 4W — use W/B when tokens have punctuation and you want to skip over it
+}}}
+
+
+EXERCISE 5 — ge and gE
+────────────────────────
+Cursor starts at [*] (on "end"). Navigate backward to the end of "second"
+(land on the 'd') using a single motion.
+
+  first second third [*]end
+
+▶ SOLUTION {{{
+  ge  — moves backward to end of previous word (lands on 'd' of "third")
+  2ge — moves to end of "second" (two words back)
+  Alternative: bb then e — two motions, less elegant
+  Note: ge is underused; it's the backward partner of e
+}}}
+
+
+EXERCISE 6 — Real edit: swap word order
+─────────────────────────────────────────
+Transform this line (cursor at [*]) so "world" comes before "hello":
+
+  [*]hello world
+
+Target: world hello
+
+▶ SOLUTION {{{
+  Method A (cut and paste):
+    deep  — deletes "hello " (de deletes word, p pastes — but ordering is tricky)
+
+  Method B (clearest):
+    dawwP  — d(aw) deletes "hello " with space, w moves to "world", P pastes before cursor
+    Result: "world hello" ✓
+
+  Method C (visual):
+    vawwP — same concept with visual select first
+
+  Breakdown of dawwP:
+    daw — delete "hello" + surrounding space → clipboard: "hello ", cursor on "world"
+    w   — move past "world" to space (optional depending on cursor position after daw)
+    P   — paste before current word
+    Adjust spacing as needed
+}}}
+
+
+════════════════════════════════════════════════════════════════
+vim: foldmethod=marker foldlevel=0

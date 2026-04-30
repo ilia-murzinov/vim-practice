@@ -1,0 +1,4 @@
+DESCRIPTION: Join the two lines into one, removing leading whitespace
+OPTIMAL: 3
+SOLUTION_A: JZZ  —  J joins next line (removes newline + normalises whitespace), then save (J + ZZ = 3 keys)
+NOTE: J is one of the most underrated vim keys. It joins the line below onto the current line, strips leading whitespace from the joined line, and inserts a single space. gJ joins without the space normalisation.

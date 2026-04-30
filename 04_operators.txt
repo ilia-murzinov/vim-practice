@@ -1,0 +1,208 @@
+VIM PRACTICE — Operators & Combos
+════════════════════════════════════════════════════════════════
+Operators: d  c  y  v  =  gU  gu  >  <
+
+Key combos:
+  D   = d$  (delete to end of line)
+  C   = c$  (change to end of line)
+  Y   = yy  (yank whole line) — or map Y = y$ for consistency
+  S   = cc  (change whole line)
+  x   = dl  (delete char under cursor)
+  s   = cl  (substitute char, enter insert)
+  ~   — toggle case of char, advance cursor
+  .   — repeat last change (the most powerful key in vim)
+
+════════════════════════════════════════════════════════════════
+
+
+EXERCISE 1 — The dot command
+──────────────────────────────
+Add a semicolon to the end of each line. Cursor starts at [*].
+
+  [*]const a = 1
+  const b = 2
+  const c = 3
+  const d = 4
+
+▶ SOLUTION {{{
+  A;<Esc>    — Append semicolon to first line (A = end of line + insert)
+  j.         — move down, repeat
+  j.         — repeat
+  j.         — repeat
+
+  Full sequence: A;<Esc>  j.  j.  j.
+  14 keystrokes for 4 lines.
+
+  The dot command repeats the ENTIRE last change.
+  A;<Esc> is one atomic change: "append ; and return to normal mode"
+  . replays it perfectly.
+
+  Alternative — macro:
+  qa A;<Esc>j q   — record macro into register a
+  3@a             — run 3 more times
+  This shines for 20+ lines.
+}}}
+
+
+EXERCISE 2 — Delete to end of line
+────────────────────────────────────
+Cursor at [*]. Delete only the trailing comment.
+
+  const value = 42; [*]// this comment should be removed
+
+▶ SOLUTION {{{
+  D     — delete from cursor to end of line ✓
+  d$    — same thing (D is just a shorthand)
+
+  But we have a space before the comment.
+  If cursor is on '/' of '//':
+  D deletes "// this comment should be removed" ✓
+
+  If cursor is on the space before '//':
+  D deletes " // this comment should be removed" ✓ (space included, clean)
+
+  Tip: often the fastest approach is:
+  f/D   — find '/', delete to end
+  or:
+  2F D  — find second non-comment char... actually f/ then D is cleanest.
+}}}
+
+
+EXERCISE 3 — Change to end of line
+────────────────────────────────────
+Cursor at [*]. Replace the value with "newValue".
+
+  let result = [*]oldValue + suffix;
+
+▶ SOLUTION {{{
+  ct;           — change TILL semicolon → deletes "oldValue + suffix", insert mode
+  Type: newValue<Esc>
+  Result: let result = newValue;
+
+  vs C:
+  C             — changes to end of line (deletes "oldValue + suffix;")
+  You'd need to re-type the semicolon.
+
+  ct; is more surgical — it changes only up to the delimiter you specify.
+
+  Alternative (if cursor at start of line):
+  f=lct;        — jump past =, change till ;
+  Or use text object: ci"  (if value were quoted)
+}}}
+
+
+EXERCISE 4 — Repeat with counts
+─────────────────────────────────
+Cursor at [*]. Delete the next 3 lines.
+
+  [*]line one
+  line two
+  line three
+  keep this line
+  keep this too
+
+▶ SOLUTION {{{
+  3dd   — delete 3 lines ✓
+  d2j   — delete current line + 2 lines down (same result) ✓
+
+  Both work. 3dd is idiomatic.
+
+  For non-line deletions:
+  d3j   — delete from current line to 3 lines down
+  dG    — delete from current line to end of file
+  dgg   — delete from current line to start of file
+}}}
+
+
+EXERCISE 5 — gU / gu — case operators
+───────────────────────────────────────
+Cursor at [*]. Transform the variable name to SCREAMING_SNAKE_CASE.
+
+  const [*]myVariableName = getValue();
+
+▶ SOLUTION {{{
+  gUiw   — uppercase the word "myVariableName" → "MYVARIABLENAME"
+           (doesn't add underscores — that requires more work or a macro)
+
+  For a full transformation with underscores: use a substitution
+  :s/\%#\w\+/\=substitute(submatch(0), '\(\l\)\(\u\)', '\1_\2', 'g')/
+  Then gUiw to uppercase.
+
+  Simpler realistic workflow:
+  1. ciw MY_VARIABLE_NAME<Esc>   — just retype it if it's short
+  2. Or use a vim substitution: :%s/myVariableName/MY_VARIABLE_NAME/g
+
+  gU key patterns to know:
+  gUU    — uppercase entire current line
+  guw    — lowercase current word
+  guu    — lowercase entire line
+  ~      — toggle case of char under cursor + advance
+  g~~    — toggle case of entire line
+}}}
+
+
+EXERCISE 6 — Indent operators
+───────────────────────────────
+Cursor at [*]. Indent the three function body lines by one level.
+
+  function foo() {
+  [*]const a = 1;
+  const b = 2;
+  return a + b;
+  }
+
+▶ SOLUTION {{{
+  >2j    — indent current line + 2 lines down (3 lines total) ✓
+  3>>    — indent 3 lines starting at cursor ✓
+
+  Both work. >2j is slightly more flexible (works with any motion).
+
+  For the whole function body:
+  Position on '{', then:
+  >i{    — indent everything inside the braces ✓ (text object!)
+
+  This is one of the most underused patterns:
+  =i{    — auto-indent inside braces
+  >i[    — indent inside square brackets
+  <i{    — de-indent inside braces
+}}}
+
+
+EXERCISE 7 — The . command with f and text objects
+────────────────────────────────────────────────────
+Cursor at [*]. Delete every string value (keep the keys and structure).
+
+  {
+  [*]  "name": "Alice",
+    "city": "London",
+    "role": "admin",
+  }
+
+▶ SOLUTION {{{
+  Goal: delete "Alice", "London", "admin" (the values, keeping keys).
+
+  Method — use . repeat:
+  f:        — find colon on first line
+  wd"       — wait — let's think more carefully
+
+  Better:
+  f"        — find opening quote of "Alice" (second " on line — may need 2f")
+  Actually: f: w f"  — find colon, word forward, find quote
+  ci"<Esc>  — change inside quotes to nothing (empty), exit insert
+             Wait: ci"<Esc> leaves empty quotes "" — that's the goal? Or delete the value?
+
+  If goal is empty strings:
+  2f"        — jump to value's opening quote
+  ci"<Esc>  — empty the string
+  j.         — next line, repeat (. repeats ci"<Esc>)
+  j.         — repeat
+
+  This works because . repeats the full ci"<Esc> action and the cursor
+  finds the nearest " to operate on each time.
+
+  Key insight: design your initial change so . can repeat it meaningfully.
+}}}
+
+
+════════════════════════════════════════════════════════════════
+vim: foldmethod=marker foldlevel=0

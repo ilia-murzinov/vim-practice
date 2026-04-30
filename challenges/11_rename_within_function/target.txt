@@ -1,0 +1,4 @@
+function send(payload) {
+  validate(payload);
+  return api.post('/events', payload);
+}

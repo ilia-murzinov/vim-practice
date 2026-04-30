@@ -1,0 +1,5 @@
+DESCRIPTION: Make the step numbers sequential (0→1, 0→2, 0→3, 0→4)
+OPTIMAL: 8
+SOLUTION_A: ggVGg<C-A>ZZ  —  select all lines, g<C-A> applies sequential increment (+1, +2, +3, +4)
+SOLUTION_B: <C-A>j.j.j.ZZ  —  increment + dot-repeat (9 keys, but only works if starting from same number)
+NOTE: g<C-A> in visual mode is a hidden gem. It increments each selected line's first number by an increasing amount (line 1 gets +1, line 2 gets +2, etc.). Requires Neovim or Vim 8+.

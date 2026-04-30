@@ -1,0 +1,190 @@
+VIM PRACTICE — Text Objects
+════════════════════════════════════════════════════════════════
+Text objects: iw aw i" a" i' a' i` a` i( a( i[ a[ i{ a{ it at
+
+  i = "inner" (excludes the delimiter itself)
+  a = "around" (includes the delimiter)
+
+  iw / aw   — word / word+surrounding-space
+  i" / a"   — inside/around double quotes
+  i' / a'   — inside/around single quotes
+  i` / a`   — inside/around backticks
+  i( / a(   — inside/around parentheses  (also: ib)
+  i[ / a[   — inside/around square brackets
+  i{ / a{   — inside/around curly braces (also: iB)
+  it / at   — inside/around XML/HTML tag
+
+Text objects work with any operator: d, c, y, v, =, gU, gu, etc.
+════════════════════════════════════════════════════════════════
+
+
+EXERCISE 1 — iw vs aw
+───────────────────────
+Cursor anywhere on "unnecessary". Delete the word AND clean up spacing.
+
+  This has unnecessary whitespace issues.
+
+▶ SOLUTION {{{
+  diw   — deletes "unnecessary", leaves a double space: "has  whitespace"
+  daw   — deletes "unnecessary " (with trailing space) → "This has whitespace issues." ✓
+
+  Rule of thumb:
+    Use  daw  (or caw) when you want the line to read naturally after deletion.
+    Use  diw  when you intend to replace (e.g. ciw to change the word).
+    Use  ciw  to replace a word — deletes it and enters insert mode, no space issues.
+}}}
+
+
+EXERCISE 2 — Change inside quotes
+───────────────────────────────────
+Cursor starts anywhere on the line. Change the string value to "newValue".
+
+  const key = "oldValue";
+
+▶ SOLUTION {{{
+  ci"        — change inside double quotes → deletes "oldValue", enters insert mode
+  Type: newValue<Esc>
+  Total: ci"newValue<Esc>
+
+  vs:
+  f"lct"newValue<Esc>  — find quote, move in, change till quote — 4 extra keystrokes
+
+  ci" is O(1) regardless of where your cursor is on the line (as long as you're between the quotes or near them).
+  Note: cursor doesn't need to be inside the quotes; ci" works from anywhere on the line
+  if there's only one quoted string (vim searches forward then backward).
+}}}
+
+
+EXERCISE 3 — Nested parentheses
+─────────────────────────────────
+Cursor at [*]. Select ONLY the inner arguments (not the outer call).
+
+  outer([*]inner(a, b), c)
+
+Target: visually select "inner(a, b)"
+
+▶ SOLUTION {{{
+  vi(   — selects everything inside outer( ) → "inner(a, b), c"  — too much
+
+  We want just "inner(a, b)". Cursor is on 'i' of "inner".
+  va(   — selects "inner(a, b)" with its parens ✓ (selects the INNER parens and their contents)
+
+  Wait — cursor is inside outer parens. va( selects the nearest enclosing parens.
+  If cursor is on 'i', the nearest ( is from inner(), so:
+  va(   → selects "(a, b)" with parens = "inner(a, b)" if we include the word... no.
+
+  Actually: va( selects the content of the parentheses the cursor is INSIDE.
+  Cursor is between outer( and ), so vi( gives "inner(a, b), c".
+
+  To select just "inner(a, b)":
+  Move cursor inside the inner parens: f(vi(  → selects "a, b"
+  Or:  f(va(  → selects "(a, b)"
+  Or to get "inner(a, b)": move cursor to 'i', then: viw  → "inner", won't work for the parens
+
+  Realistic answer: f(va( selects "(a, b)", which is the inner group.
+  For "inner(a, b)" as a unit, use a motion: Bv% or position carefully.
+
+  Key lesson: text objects select the NEAREST enclosing delimiter.
+  Use counts to go outward: 2vi( selects the next outer pair.
+}}}
+
+
+EXERCISE 4 — ci( for function args
+────────────────────────────────────
+Cursor at [*]. Replace all arguments with "newArg".
+
+  calculateTotal([*]price, tax, discount)
+
+▶ SOLUTION {{{
+  ci(          — deletes "price, tax, discount", enters insert mode
+  Type: newArg<Esc>
+  Result: calculateTotal(newArg)
+
+  Cursor can be anywhere inside the parens or even on the outer function name —
+  ci( searches for the nearest enclosing ().
+
+  Alternatives (all worse):
+  f(ldt)i newArg<Esc>  — 12+ keystrokes
+  0f(lC newArg)        — hacky
+
+  ci( : 3 keystrokes to set up, then just type the replacement. Extremely efficient.
+}}}
+
+
+EXERCISE 5 — it for HTML tags
+───────────────────────────────
+Cursor at [*]. Change the text inside the tag.
+
+  <p>[*]Old paragraph text here.</p>
+
+▶ SOLUTION {{{
+  cit         — change inside tag → deletes "Old paragraph text here.", enters insert mode
+  Type replacement text, then <Esc>
+
+  dit         — delete inside tag (leave tags empty)
+  yit         — yank inside tag
+  vit         — visually select inside tag
+
+  at (around tag) includes the tags themselves:
+  dat         — deletes "<p>Old paragraph text here.</p>" entirely
+  cat         — changes including the tags
+}}}
+
+
+EXERCISE 6 — Combining text objects with operators
+────────────────────────────────────────────────────
+Cursor at [*]. Uppercase the contents of the array.
+
+  const arr = [[*]"alpha", "beta", "gamma"];
+
+▶ SOLUTION {{{
+  gU i[       — uppercase inside square brackets
+  Result: const arr = ["ALPHA", "BETA", "GAMMA"];
+
+  Or if you want to delete the whole array contents:
+  di[         — delete inside []
+
+  Or to yank the array for use elsewhere:
+  ya[         — yank around [] (includes brackets)
+
+  gU works with any text object:
+  gUiw        — uppercase current word
+  gUi"        — uppercase string contents
+  gUi{        — uppercase block contents
+}}}
+
+
+EXERCISE 7 — Chaining: yank and paste with text objects
+─────────────────────────────────────────────────────────
+Cursor at [*]. Duplicate the function argument list.
+
+  function foo([*]a, b, c) {
+    return bar();
+  }
+
+Goal:
+  function foo(a, b, c) {
+    return bar(a, b, c);
+  }
+
+▶ SOLUTION {{{
+  yi(          — yank inside parentheses → yanks "a, b, c"
+  /bar<CR>     — jump to bar
+  f(a          — find (, enter insert mode AFTER it (or use: f(l  then i)
+
+  Actually cleaner:
+  yi(          — yank "a, b, c"
+  /bar(<CR>    — find "bar("
+  f(           — cursor on (
+  a            — insert after (
+  <C-r>"       — paste from default register: "a, b, c"
+  <Esc>
+
+  Or: yi( then navigate to bar() and use: ci(  then <C-r>"<Esc>
+
+  Key: yi( is the right way to grab argument lists. No need to manually select.
+}}}
+
+
+════════════════════════════════════════════════════════════════
+vim: foldmethod=marker foldlevel=0

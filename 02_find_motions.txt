@@ -1,0 +1,145 @@
+VIM PRACTICE — Find & Till Motions
+════════════════════════════════════════════════════════════════
+Motions: f  F  t  T  ;  ,
+
+  f{c}  — forward to next occurrence of char c (cursor ON c)
+  F{c}  — backward to prev occurrence of char c (cursor ON c)
+  t{c}  — forward TILL char c (cursor one before c)
+  T{c}  — backward TILL char c (cursor one after c)
+  ;     — repeat last f/F/t/T in same direction
+  ,     — repeat last f/F/t/T in opposite direction
+
+These are among the fastest motions in vim. Master them.
+════════════════════════════════════════════════════════════════
+
+
+EXERCISE 1 — f vs t: know the difference
+──────────────────────────────────────────
+Cursor starts at [*]. Delete the comma without deleting "apples".
+
+  bananas, [*]apples, oranges, grapes
+
+▶ SOLUTION {{{
+  F,    — jumps backward to the comma before "apples"
+  x     — deletes the comma
+  Total: F,x (3 keystrokes)
+
+  NOT: df,  — this deletes from cursor to next comma, taking "apples," with it
+  NOT: F,dl — works but x is cleaner than dl
+
+  Key insight: F lands ON the character, so x deletes exactly it.
+}}}
+
+
+EXERCISE 2 — Delete between delimiters with t
+───────────────────────────────────────────────
+Cursor starts at [*]. Delete the content inside the quotes (leave the quotes).
+
+  const msg = [*]"hello world";
+
+▶ SOLUTION {{{
+  f"    — jump to opening quote
+  dt"   — delete TILL next quote (deletes "hello world", leaves both quotes)
+  Result: const msg = "";
+
+  Alternative: f"ldt"  — f to quote, l to move inside, dt" same result
+  Alternative: ci"     — (text object, from Exercise 3) — even faster
+
+  Note: t lands BEFORE the target char, so dt" stops just before the closing quote.
+  This is exactly why t exists — to delete up to (not including) a delimiter.
+}}}
+
+
+EXERCISE 3 — Semicolon repeat
+───────────────────────────────
+Cursor starts at [*]. Change every "x" to "y" on this line using ; to repeat.
+
+  [*]ax bx cx dx ex
+
+▶ SOLUTION {{{
+  fx    — land on first x
+  rx    → ry  (replace x with y)
+
+  Better workflow:
+  fx ry ;ry ;ry ;ry ;ry
+
+  Even better (if just replacing one char at a time):
+  fx    — find first x
+  ry    — replace with y
+  ;.    — ; repeats the find, . repeats the replace action (ry)
+  ;.;.;.  — repeat for each x
+
+  The  ;.  pattern is extremely powerful for repetitive single-char edits.
+  Total keystrokes to replace all 5: fx ry ;. ;. ;. ;.  = about 12 keys
+}}}
+
+
+EXERCISE 4 — Using , to reverse
+─────────────────────────────────
+Cursor starts at [*] (on the last 'e'). Navigate to the first 'e'.
+
+  one two three four five [*]here
+
+▶ SOLUTION {{{
+  Fe    — finds previous 'e' (goes to 'e' in "five")
+  ;     — repeats Fe backward (next 'e' going left = 'e' in "three" → "four" → "five"...)
+          Wait: ; repeats in the SAME direction as the original motion.
+          F goes backward, so ; also goes backward (further left).
+  Fe;;  — Fe → "five.e", ; → "three.e", ; → "on.e"
+  3 keystrokes + the char = Fe;; lands on first 'e' in "one"
+
+  Verify:
+    Fe   → lands on 'e' in "fiv[e]"
+    ;    → lands on 'e' in "thr[e]e" (second e)
+    ;    → lands on 'e' in "thr[e]e" (first e) — or "on[e]"
+    ;    → "on[e]"
+
+  , would go forward (right) if you overshoot.
+}}}
+
+
+EXERCISE 5 — t for operators
+──────────────────────────────
+Cursor at [*]. Yank just the function name "processData" (not the parentheses).
+
+  function [*]processData(userId, options) {
+
+▶ SOLUTION {{{
+  yt(   — yank TILL '(' — copies "processData" without the paren
+  Compare:
+    yf(  — yank to '(' INCLUDING the paren → "processData("  ✗
+    yt(  — yank TILL '(' EXCLUDING the paren → "processData"  ✓
+
+  This is the canonical use of t vs f with operators:
+  Use t when you want to operate UP TO but NOT INCLUDING the target character.
+  Use f when you want to INCLUDE the target character.
+}}}
+
+
+EXERCISE 6 — Chaining finds
+─────────────────────────────
+Cursor at [*]. Delete from cursor to (but not including) the second semicolon.
+
+  [*]a = 1; b = 2; c = 3;
+
+▶ SOLUTION {{{
+  Goal: delete "a = 1; b = 2" leaving "; c = 3;"
+
+  t;    — move TILL first semicolon (cursor before first ;)
+  Hmm, we want to delete up to the SECOND semicolon.
+
+  Method A:
+  dt;   — deletes "a = 1" up to first ; → leaves "; b = 2; c = 3;"  ✗ not what we want
+
+  Rethink: we want to DELETE "a = 1; b = 2" and keep the second semicolon.
+  2t;   — move TILL second ;  (t with count)
+  d2t;  — delete till second semicolon → leaves "; c = 3;"
+
+  Verify: d2t; deletes "a = 1; b = 2" ✓
+
+  Key: f and t accept counts.  2f;  means "find second occurrence of ;"
+}}}
+
+
+════════════════════════════════════════════════════════════════
+vim: foldmethod=marker foldlevel=0

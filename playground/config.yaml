@@ -1,0 +1,107 @@
+service:
+  name: user-service
+  version: "2.4.1"
+  environment: production
+  region: eu-west-1
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  graceful_shutdown_timeout: 30s
+  read_timeout: 10s
+  write_timeout: 15s
+  max_connections: 10000
+
+database:
+  primary:
+    host: db-primary.internal
+    port: 5432
+    name: users_db
+    user: app_user
+    credential: "${DB_PASSWORD}"
+    pool:
+      min_size: 5
+      max_size: 50
+      acquire_timeout: 5s
+      idle_timeout: 300s
+  replica:
+    host: db-replica.internal
+    port: 5432
+    name: users_db
+    user: app_readonly
+    credential: "${DB_READONLY_PASSWORD}"
+    pool:
+      min_size: 2
+      max_size: 20
+
+cache:
+  redis:
+    host: redis.internal
+    port: 6379
+    credential: "${REDIS_PASSWORD}"
+    db: 0
+    max_retries: 3
+    dial_timeout: 2s
+    read_timeout: 1s
+    write_timeout: 1s
+    pool_size: 20
+  ttl:
+    user_profile: 300s
+    session: 3600s
+    rate_limit: 60s
+
+messaging:
+  kafka:
+    brokers:
+      - kafka-1.internal:9092
+      - kafka-2.internal:9092
+      - kafka-3.internal:9092
+    topics:
+      user_events: user.events.v2
+      audit_log: audit.log.v1
+    consumer_group: user-service-consumers
+    producer:
+      acks: all
+      retries: 5
+      compression: lz4
+
+auth:
+  jwt:
+    public_key_path: /etc/secrets/jwt_public.pem
+    algorithm: RS256
+    expiry: 3600s
+  service_account:
+    key_path: /etc/secrets/service_account.json
+
+observability:
+  metrics:
+    enabled: true
+    port: 9090
+    path: /metrics
+  tracing:
+    enabled: true
+    exporter: jaeger
+    endpoint: http://jaeger.internal:14268/api/traces
+    sample_rate: 0.1
+  logging:
+    level: info
+    format: json
+    output: stdout
+
+feature_flags:
+  new_onboarding_flow: false
+  email_verification_required: true
+  rate_limiting_enabled: true
+  soft_delete_enabled: true
+  audit_log_enabled: true
+
+rate_limiting:
+  default:
+    requests_per_minute: 60
+    burst: 10
+  authenticated:
+    requests_per_minute: 300
+    burst: 50
+  admin:
+    requests_per_minute: 1000
+    burst: 100

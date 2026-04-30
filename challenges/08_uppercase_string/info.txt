@@ -1,0 +1,5 @@
+DESCRIPTION: Uppercase the string contents — "hello world" becomes "HELLO WORLD"
+OPTIMAL: 6
+SOLUTION_A: gUi"ZZ  —  uppercase operator on inside-quotes text object (g U i " + ZZ = 6 keys)
+SOLUTION_B: f"lvt"UZZ  —  find quote, visual select, uppercase (more keys, less idiomatic)
+NOTE: gU is the uppercase operator. It works with any text object or motion: gUiw (word), gUi{ (block), gUU (whole line). No need to enter insert mode.

@@ -1,0 +1,6 @@
+function process(data) {
+  console.log('start', data);
+  const result = transform(data);
+  console.log('result', result);
+  return result;
+}

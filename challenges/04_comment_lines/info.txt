@@ -1,0 +1,5 @@
+DESCRIPTION: Add "// " to the beginning of all 3 lines
+OPTIMAL: 10
+SOLUTION_A: <C-v>2jI// <Esc>ZZ  —  visual block, select 2 lines down, insert at start of each (Ctrl-V + 2j + I + // + space + Esc + ZZ = 10 keys)
+SOLUTION_B: I// <Esc>j.j.ZZ  —  insert on first line, repeat with dot (I + // + space + Esc + j + . + j + . + ZZ = 11 keys)
+NOTE: Visual block + I is the canonical vim approach for multi-line prefix insertion. Ctrl-V enters visual block mode; I inserts at the start of every selected line simultaneously.

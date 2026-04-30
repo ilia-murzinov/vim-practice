@@ -1,0 +1,6 @@
+DESCRIPTION: Delete the trailing comment, leave "const value = 42;"
+OPTIMAL: 6
+SOLUTION_A: f/hDZZ  —  find '/', move left to space, delete to EOL (6 keys)
+SOLUTION_B: f;a <BS><Esc>... no — worse
+NOTE: f/ lands ON the slash. h moves to the space before it. D deletes space + comment. Clean result with no trailing space.
+NOTE: Alternative: T;DZZ (3+1+2=6) — T; goes backward-till-semicolon, landing on space after it, then D. Same count but elegant if cursor is past the semicolon.

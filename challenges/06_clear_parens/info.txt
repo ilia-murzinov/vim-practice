@@ -1,0 +1,4 @@
+DESCRIPTION: Replace all 4 arguments with a single "newConfig"
+OPTIMAL: 15
+SOLUTION_A: ci(newConfig<Esc>ZZ  —  change inside parens, type replacement (c i ( + "newConfig" + Esc + ZZ = 15 keys)
+NOTE: ci( deletes everything between ( and ) and enters insert mode. Cursor can be anywhere on the line.
