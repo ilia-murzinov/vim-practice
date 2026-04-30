@@ -105,53 +105,66 @@ function! s:picker_select() abort
   endif
 endfunction
 
+" ─── :VimRandom ─────────────────────────────────────────────────────────────
+
+function! s:random() abort
+  if !executable('python3')
+    call s:hl('  python3 not found — required for :VimRandom', 'ErrorMsg') | return
+  endif
+  let gen = s:root . '/generate.py'
+  if !filereadable(gen)
+    call s:hl('  generate.py not found in ' . s:root, 'ErrorMsg') | return
+  endif
+  let out = s:tmp . '/random'
+  call system('python3 ' . shellescape(gen) . ' ' . shellescape(out))
+  if v:shell_error
+    call s:hl('  Challenge generation failed', 'ErrorMsg') | return
+  endif
+  call s:load_dir(out)
+endfunction
+
 " ─── :VimChallenge {n} ───────────────────────────────────────────────────────
 
 function! s:load(n) abort
   let all = g:vp.challenges()
   if empty(all)
-    call s:hl('  No challenges found in ' . s:challenges_dir, 'ErrorMsg')
-    return
+    call s:hl('  No challenges found in ' . s:challenges_dir, 'ErrorMsg') | return
   endif
-
   let idx = a:n - 1
   if idx < 0 || idx >= len(all)
     call s:hl('  No challenge ' . a:n . ' — use :VimList (' . len(all) . ' available)', 'ErrorMsg')
     return
   endif
+  call s:load_dir(all[idx])
+endfunction
 
-  let dir    = all[idx]
-  let start  = dir . '/start.txt'
-  let target = dir . '/target.txt'
+function! s:load_dir(dir) abort
+  let start  = a:dir . '/start.txt'
+  let target = a:dir . '/target.txt'
 
   if !filereadable(start)
-    call s:hl('  Missing start.txt in ' . dir, 'ErrorMsg') | return
+    call s:hl('  Missing start.txt in ' . a:dir, 'ErrorMsg') | return
   endif
   if !filereadable(target)
-    call s:hl('  Missing target.txt in ' . dir, 'ErrorMsg') | return
+    call s:hl('  Missing target.txt in ' . a:dir, 'ErrorMsg') | return
   endif
 
-  " Each challenge gets its own working file so tabs don't clobber each other
   call mkdir(s:tmp, 'p')
-  let work = g:vp.work_path(dir)
+  let work = g:vp.work_path(a:dir)
   call writefile(readfile(start), work)
-
-  " Clear register q for this tab's fresh attempt
   call setreg('q', '')
 
-  " Layout: working buffer (top) / target read-only (bottom)
   execute 'tabnew ' . fnameescape(work)
 
-  " Per-tab state lives in the new tab so :VimCheck/:VimReset can access it
-  let t:vp_dir     = dir
+  let t:vp_dir     = a:dir
   let t:vp_target  = target
-  let t:vp_optimal = str2nr(g:vp.meta(dir, 'OPTIMAL'))
-  let t:vp_name    = fnamemodify(dir, ':t')
+  let t:vp_optimal = str2nr(g:vp.meta(a:dir, 'OPTIMAL'))
+  let t:vp_name    = fnamemodify(a:dir, ':t')
   setlocal noswapfile
   execute 'rightbelow split ' . fnameescape(target)
   setlocal readonly nomodifiable noswapfile bufhidden=hide
   setlocal statusline=\ TARGET\ (read\ only)
-  wincmd p  " return focus to working buffer
+  wincmd p
 
   let &l:statusline = ' ' . t:vp_name
         \ . '  |  optimal: ' . t:vp_optimal . ' keys'
@@ -249,13 +262,16 @@ endfunction
 
 nnoremap <Space>v  :VimChallenge<Space>
 nnoremap <Space>vl :VimList<CR>
+nnoremap <Space>vn :VimRandom<CR>
 nnoremap <Space>vc :VimCheck<CR>
 nnoremap <Space>vr :VimReset<CR>
 
 " ─── commands ────────────────────────────────────────────────────────────────
 
-command!          VimList      call s:list()
-command! -nargs=1 VimChallenge call s:load(<args>)
-command!          VimCheck     call s:check()
-command!          VimReset     call s:reset()
+command!          VimList            call s:list()
+command!          VimRandom          call s:random()
+command! -nargs=1 VimChallenge       call s:load(<args>)
+command! -nargs=1 VimLoadDir         call s:load_dir(<q-args>)
+command!          VimCheck           call s:check()
+command!          VimReset           call s:reset()
 
