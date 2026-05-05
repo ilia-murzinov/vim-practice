@@ -253,19 +253,23 @@ endfunction
 
 " ─── key counting ───────────────────────────────────────────────────────────
 
-" keytrans converts internal bytes to human-readable tokens like <Ignore>.
-" Tokens that are not user-typeable vim keys are stripped before display/count.
-" In a vim-motions context, valid keys are plain chars plus <Esc>/<CR>/<Tab>
-" and modifier combos (<C-x>, <M-x>). Everything else is plugin noise.
-let s:garbage_key_pat = '<Ignore>\|<SNR>[^>]*>'
+" Neovim internal key sequences are 3 raw bytes: 0x80 + 2 more bytes.
+" Vimscript regex can't match raw bytes >= 0x80 (UTF-8 string layer), so we
+" use Lua which operates on byte strings directly.
+function! s:strip_internal_keys(raw) abort
+  if has('nvim')
+    return luaeval('_A:gsub("[\128-\255]..", "")', a:raw)
+  endif
+  return substitute(a:raw, '\%x80..', '', 'g')
+endfunction
 
 function! s:clean_keys(raw) abort
-  return substitute(keytrans(a:raw), s:garbage_key_pat, '', 'g')
+  return keytrans(s:strip_internal_keys(a:raw))
 endfunction
 
 function! s:count_keys(raw) abort
   let s = s:clean_keys(a:raw)
-  " Each remaining <XYZ> token is one keystroke
+  " Each <XYZ> token (e.g. <Esc>, <CR>) counts as one keystroke
   let specials = len(split(s, '<[^>]\+>', 1)) - 1
   let plain = strlen(substitute(s, '<[^>]\+>', '', 'g'))
   return plain + specials
