@@ -1,0 +1,4 @@
+DESCRIPTION: Remove the sanitize() wrapper, leaving only validate(input)
+OPTIMAL: 8
+SOLUTION_A: f(ldwf)x  —  find outer (, step inside, dw deletes the word "sanitize", f) finds the now-orphaned ), x deletes it
+NOTE: f( lands on validate's opening paren. l steps one character inside to the start of "sanitize". dw deletes exactly the word (stops at the next paren). f) finds the closing paren that belonged to sanitize(). x removes it. No visual selection, no search — pure motions.

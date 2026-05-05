@@ -1,0 +1,6 @@
+const theme = {
+  spacing: 8,
+  primary: "#1a2b3c",
+  fontSize: 16,
+  secondary: "#4d5e6f",
+};

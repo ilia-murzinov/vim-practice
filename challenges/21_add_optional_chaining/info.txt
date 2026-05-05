@@ -1,0 +1,4 @@
+DESCRIPTION: Add optional chaining — insert ?. before each . in both config accesses
+OPTIMAL: 11
+SOLUTION_A: f.i?<Esc>;.;.;.  —  find first dot, insert ?, then ; repeats the f. motion and . repeats the insert (4 dots total)
+NOTE: After i?<Esc> the cursor sits just before the dot. ; finds the next dot without re-typing f. — combine with . to repeat the insertion at each dot in a single keystroke pair.

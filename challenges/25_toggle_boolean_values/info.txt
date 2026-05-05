@@ -1,0 +1,4 @@
+DESCRIPTION: Change all three true values to false
+OPTIMAL: 18
+SOLUTION_A: /true<CR>cgnfalse<Esc>..  —  search to land on first match, cgn changes it, dot repeats for the remaining two
+NOTE: Same cgn pattern as rename_method but on value replacement. The search /true positions the cursor on the first match. cgn + text + Esc is one repeatable unit. Each . advances to the next match and replays the change.

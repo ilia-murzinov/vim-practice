@@ -1,0 +1,3 @@
+db.getUser(id);
+db.getUser(adminId);
+db.getUser(guestId);

@@ -1,0 +1,5 @@
+DESCRIPTION: Rename method fetchUser to getUser across all 3 call sites
+OPTIMAL: 24
+SOLUTION_A: /fetchUser<CR>cgngetUser<Esc>..  —  search to position on the word, cgn changes current match, dot repeats for each remaining occurrence
+SOLUTION_B: :%s/fetchUser/getUser/g<CR>  —  global substitute (25 keys, one more than cgn)
+NOTE: cgn = change + go to next match. It changes the match under the cursor in one motion, and the resulting change is dot-repeatable. Unlike n.  which needs a separate cw per match, cgn collapses search + change + advance into a single repeatable unit.

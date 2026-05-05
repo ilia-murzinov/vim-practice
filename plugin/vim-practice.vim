@@ -310,20 +310,22 @@ function! s:check() abort
   endif
 
   echo ''
-  echo printf('  Your keys   : %d', keys)
-  echo printf('  Optimal     : %d', t:vp_optimal)
+  if correct
+    echo printf('  Your keys   : %d', keys)
+    echo printf('  Optimal     : %d', t:vp_optimal)
 
-  if keys == 0
-    call s:hl('  ⚠  register q is empty — did you record with qq … q?', 'WarningMsg')
-  elseif keys <= t:vp_optimal
-    call s:hl('  Rating      : OPTIMAL OR BETTER ✓', 'DiffAdd')
-  elseif keys * 2 <= t:vp_optimal * 3
-    call s:hl('  Rating      : GOOD', 'WarningMsg')
-  else
-    call s:hl('  Rating      : NEEDS WORK', 'ErrorMsg')
+    if keys == 0
+      call s:hl('  ⚠  register q is empty — did you record with qq … q?', 'WarningMsg')
+    elseif keys <= t:vp_optimal
+      call s:hl('  Rating      : OPTIMAL OR BETTER ✓', 'DiffAdd')
+    elseif keys * 2 <= t:vp_optimal * 3
+      call s:hl('  Rating      : GOOD', 'WarningMsg')
+    else
+      call s:hl('  Rating      : NEEDS WORK', 'ErrorMsg')
+    endif
+
+    echo ''
   endif
-
-  echo ''
   echo '  Macro (q)   : ' . s:clean_keys(regq)
   echo ''
 

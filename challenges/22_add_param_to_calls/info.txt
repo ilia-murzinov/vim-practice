@@ -1,0 +1,4 @@
+DESCRIPTION: Add ", requestId" as a second argument to all 3 logger calls
+OPTIMAL: 19
+SOLUTION_A: f)i, requestId<Esc>j.j.  —  find ), insert before it, dot-repeat on the next two lines
+NOTE: f) positions the cursor on the closing paren. i inserts before it. j. moves down and replays the entire change. This scales to any number of identical lines — 10 lines would just be j. repeated 9 times.

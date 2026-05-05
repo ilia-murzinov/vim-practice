@@ -1,0 +1,4 @@
+DESCRIPTION: Sort the object properties alphabetically
+OPTIMAL: 9
+SOLUTION_A: vi{:sort<CR>  —  select inner block as visual, pipe to :sort
+NOTE: vi{ selects all lines between the braces. :sort in visual mode operates only on the selected lines. This works on any block — arrays, objects, CSS rules. For reverse sort use :sort!<CR>.
