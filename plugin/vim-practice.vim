@@ -251,6 +251,26 @@ function! s:load_dir(dir) abort
   echo ''
 endfunction
 
+" ─── key counting ───────────────────────────────────────────────────────────
+
+" keytrans converts internal bytes to human-readable tokens like <Ignore>.
+" Tokens that are not user-typeable vim keys are stripped before display/count.
+" In a vim-motions context, valid keys are plain chars plus <Esc>/<CR>/<Tab>
+" and modifier combos (<C-x>, <M-x>). Everything else is plugin noise.
+let s:garbage_key_pat = '<Ignore>\|<SNR>[^>]*>'
+
+function! s:clean_keys(raw) abort
+  return substitute(keytrans(a:raw), s:garbage_key_pat, '', 'g')
+endfunction
+
+function! s:count_keys(raw) abort
+  let s = s:clean_keys(a:raw)
+  " Each remaining <XYZ> token is one keystroke
+  let specials = len(split(s, '<[^>]\+>', 1)) - 1
+  let plain = strlen(substitute(s, '<[^>]\+>', '', 'g'))
+  return plain + specials
+endfunction
+
 " ─── :VimCheck ───────────────────────────────────────────────────────────────
 
 function! s:check() abort
@@ -267,9 +287,7 @@ function! s:check() abort
   endif
 
   let regq = getreg('q')
-  let keys_raw   = strlen(regq)
-  let keys_score = g:vp.macro_key_count(regq)
-  let keys    = keys_score
+  let keys = s:count_keys(regq)
   let correct = g:vp.compare(getline(1, '$'), readfile(t:vp_target))
 
   echo ''
@@ -289,10 +307,6 @@ function! s:check() abort
 
   echo ''
   echo printf('  Your keys   : %d', keys)
-  if keys_raw != keys_score
-    echo printf('  (%d bytes recorded in q → %d Esc/keys for scoring)',
-          \ keys_raw, keys_score)
-  endif
   echo printf('  Optimal     : %d', t:vp_optimal)
 
   if keys == 0
@@ -306,7 +320,7 @@ function! s:check() abort
   endif
 
   echo ''
-  echo '  Macro (q)   : ' . regq
+  echo '  Macro (q)   : ' . s:clean_keys(regq)
   echo ''
 
   let ans = input('  Show solutions? [y/N] ')
